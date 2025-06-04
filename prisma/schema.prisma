@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  HOD
+  TEACHER
+  STUDENT
+  ASSISTANT_TEACHER
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  password     String
+  role         UserRole
+
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  addedById    Int?
+  addedBy      User?       @relation("UserAddedBy", fields: [addedById], references: [id])
+  addedUsers   User[]      @relation("UserAddedBy")
+
+  startDate    DateTime?
+  endDate      DateTime?
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+ // Add these relations with exactly matching names
+  studentAttendances  Attendance[] @relation("StudentAttendance")
+  attendancesMarked   Attendance[] @relation("MarkedByUser")
+  attendancesApproved Attendance[] @relation("ApprovedByUser")
+}
+
+model Department {
+  id         Int        @id @default(autoincrement())
+  name       String
+  users      User[]
+  subjects   Subject[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Subject {
+  id           Int        @id @default(autoincrement())
+  name         String
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Attendance {
+  id           Int        @id @default(autoincrement())
+  studentId    Int
+  student      User       @relation("StudentAttendance", fields: [studentId], references: [id])
+  markedById   Int
+  markedBy     User       @relation("MarkedByUser", fields: [markedById], references: [id])
+  approvedById Int?
+  approvedBy   User?      @relation("ApprovedByUser", fields: [approvedById], references: [id])
+  date         DateTime
+  isPresent    Boolean
+  absentReason AbsentReason?
+  createdAt    DateTime   @default(now())
+}
+
+model AbsentReason {
+  id           Int        @id @default(autoincrement())
+  attendanceId Int        @unique
+  attendance   Attendance @relation(fields: [attendanceId], references: [id])
+  reason       String
+  createdAt    DateTime   @default(now())
+}

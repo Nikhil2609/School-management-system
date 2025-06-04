@@ -1,15 +1,15 @@
-import { LoginBody } from '../utils/interface/IApiResponse';
-import { UserModal } from '../models/user.modal';
+import { User } from '@prisma/client';
+import prisma from '../prisma';
 
 export default class AuthRepository {
-  constructor() {}
+  constructor() { }
 
   login = async (email: string) => {
-    return await UserModal.findOne({ where: { email } });
+    return await prisma.user.findUnique({ where: { email } });
   };
 
-  register = async (body: LoginBody) => {
-    const customer = await UserModal.create({ ...body });
+  register = async (body: User) => {
+    const customer = await prisma.user.create({ data: body });
     return customer;
   };
 }
