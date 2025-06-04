@@ -1,0 +1,5 @@
+Implement ESlint and format using prettier for consistenet code format 
+- Routing
+- DB connection Postgres
+- Env file configuartion
+- Migration & seeders
